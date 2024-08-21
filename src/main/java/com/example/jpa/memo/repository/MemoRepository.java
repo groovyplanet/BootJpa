@@ -1,5 +1,6 @@
 package com.example.jpa.memo.repository;
 
+import com.example.jpa.entity.MemberMemoDTO;
 import com.example.jpa.entity.Memo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -89,6 +90,13 @@ public interface MemoRepository extends JpaRepository<Memo, Long> ,//엔티티�
     @Query(value = "select * from memo where  mno = ?", nativeQuery = true)
     Memo getNative(Long mno);
 
+    //구현체에 만드는 구문은 인터페이스에서 이렇게 호출하는 것과 동일합니다.
+//    @Query("select m from Memo m inner join m.member x where m.mno >= :a")
+//    List<Memo> mtoJoin1(@Param("a") Long a);
+    @Query(value = "select new com.example.jpa.entity.MemberMemoDTO( x.id, x.name, x.signDate, m.mno, m.writer, m.text) " +
+            "from Memo m left join m.member x where m.writer like %:writer%"
+            , countQuery = "select count(m) from Memo m left join m.member x where m.writer like %:writer%")
+    Page<MemberMemoDTO> joinPage(@Param("writer") String text, Pageable pageable);
 
 }
 
